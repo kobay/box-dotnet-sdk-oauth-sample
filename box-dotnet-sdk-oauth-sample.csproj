@@ -5,4 +5,8 @@
     <RootNamespace>box_dotnet_sdk_oauth_sample</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Box.V2.Core" Version="3.25.0" />
+  </ItemGroup>
+
 </Project>
