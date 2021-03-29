@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <div class="box-container"></div>
+</div>
+
+<script src="https://cdn01.boxcdn.net/platform/elements/11.0.2/ja-JP/explorer.js" asp-append-version="true"></script>
+<link rel="stylesheet" href="https://cdn01.boxcdn.net/platform/elements/11.0.2/ja-JP/explorer.css" />
+
+<script>
+  const folderId = "0";
+  const accessToken = "@ViewBag.accessToken";
+  const contentExplorer = new window.Box.ContentExplorer();
+  contentExplorer.show(folderId, accessToken, {
+    container: ".box-container"
+  });
+</script>
+
+<style>
+    .box-container {
+        width: 100%;
+        height: 80vh;
+        margin: 0;
+        padding: 0;
+        min-width: 320px;
+    }
+</style>
