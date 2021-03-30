@@ -26,7 +26,7 @@ namespace box_dotnet_sdk_oauth_sample
             services.AddDistributedMemoryCache();
             services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromSeconds(360);
+                options.IdleTimeout = TimeSpan.FromHours(24);
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });

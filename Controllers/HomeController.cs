@@ -21,7 +21,8 @@ namespace box_dotnet_sdk_oauth_sample.Controllers
         // マイアプリ(標準OAuth）→ 構成 → クライアントIDとクライアントシークレット
         private const string clientId = "asly78y1y07oux91k1ay2g3i8whpjq61";
         private const string clientSecret = "Jti29KH4L1tAJKa7rd0kX3PEI8DGHuHJ";
-        private const string callBackUrl = "https://localhost:5001/Home/UIElements";
+        // private const string callBackUrl = "https://localhost:5001/Home/UIElements";
+        private const string callBackUrl = "https://localhost:5001/Home/BoxRedirect";
 
         private readonly ILogger<HomeController> _logger;
 
@@ -44,7 +45,7 @@ namespace box_dotnet_sdk_oauth_sample.Controllers
             return View();
         }
 
-        public async Task<IActionResult> UIElements(String code)
+        public async Task<IActionResult> BoxRedirect(String code)
         {
             Console.WriteLine("BoxRedirect {0}", code);
 
@@ -63,6 +64,31 @@ namespace box_dotnet_sdk_oauth_sample.Controllers
             HttpContext.Session.SetString("TokenType", session.TokenType);
 
 
+            var user = await client.UsersManager.GetCurrentUserInformationAsync();
+            Console.WriteLine($"Login User: Id={user.Id}, Name={user.Name}, Login={user.Login}");
+
+            ViewBag.accessToken = accessToken;
+            return RedirectToAction("UIElements");
+        }
+        
+        public async Task<IActionResult> UIElements()
+        {
+            var accessToken = HttpContext.Session.GetString("AccessToken");
+            var refreshToken = HttpContext.Session.GetString("RefreshToken");
+            var expiresIn = HttpContext.Session.GetInt32("ExpiresIn") ?? default(int);
+            var tokenType = HttpContext.Session.GetString("TokenType");
+
+            Console.WriteLine($"session accessToken {accessToken}");
+            Console.WriteLine($"session refreshToken {refreshToken}");
+            Console.WriteLine($"session expiresIn {expiresIn}");
+            Console.WriteLine($"session tokenType {tokenType}");
+
+            
+            var session = new OAuthSession(accessToken, refreshToken, expiresIn, tokenType);
+            
+            var config = new BoxConfig(clientId, clientSecret, new System.Uri(callBackUrl));
+            var client = new BoxClient(config, session);
+            
             var user = await client.UsersManager.GetCurrentUserInformationAsync();
             Console.WriteLine($"Login User: Id={user.Id}, Name={user.Name}, Login={user.Login}");
 
@@ -90,15 +116,17 @@ namespace box_dotnet_sdk_oauth_sample.Controllers
 
             var filePath = @"appsettings.json";
 
-
-            var count = HttpContext.Session.GetInt32("count") ?? 0;
-            HttpContext.Session.SetInt32("count", ++count);
+            Random rnd = new Random();
+            var rndNum = rnd.Next(Int32.MaxValue);
+            
+            
+            Console.WriteLine($"rndNum = {rndNum}");
 
             await using (FileStream fileStream = new FileStream(filePath, FileMode.Open))
             {
                 BoxFileRequest requestParams = new BoxFileRequest()
                 {
-                    Name = $"test-upload-{count}.json",
+                    Name = $"test-upload-{rndNum}.json",
                     Parent = new BoxRequestEntity() {Id = "0"}
                 };
 
@@ -106,8 +134,8 @@ namespace box_dotnet_sdk_oauth_sample.Controllers
                 Console.WriteLine($"uploaded {file.Id} / {file.Name}");
             }
 
-            // return RedirectToAction("UIElements");
-            return View();
+            return RedirectToAction("UIElements");
+            // return View();
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
